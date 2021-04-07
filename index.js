@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+app.use(express.json());
 
 const mps=[
     {name:"Abdul-Aziz Ayaba", age:35, hometown:"Sang", party:"NPP", constituency:"MION", religion:"Islam"},
@@ -17,6 +18,8 @@ app.get("/", (req, res) => res.send("this is my mps api"))
 app.get("/api/mps", (req, res) => {
     res.json(mps);
 });
+
+//get single Mp
 app.get("/api/mps/:constituency", (req, res) => {
     const constituency = req.params.constituency;
     const mp = mps.some((m) => m.constituency);
@@ -26,34 +29,36 @@ app.get("/api/mps/:constituency", (req, res) => {
         res.status(404).json({message:"not available"});
     }
 });
-
+//delete single Mp
 app.delete("/api/mp/:constituency", (req,res) => {
     const constituency = req.params.constituency;
-    const mp = mps.some((m) => m.constituency);
+    const mp = mps.some((m) => m.constituency===req.params.constituency);
     if (mp) {
         res.json({
             msg:`MP's details deleted ${constituency}`,
-            mps: mps.filter((m) => m.constituency),
-        });
+            mps: mps.filter((m) => m.constituency!==constituency)
+        }); 
+
     }
 });
 
+//add a single MP
 app.post("/restapi/mps", (req, res) => {
-    const newMp = {
+    const Mp = {
         name:req.body.name,
         age:req.body.age,
         hometown:req.body.hometown,
         party:req.body.party,
-        co:req.body.co,
+        constituency:req.body.constituency,
         religion:req.body.religion
     };
-    mps.push(newMp);
-    res.json(mps);
+    mps.push(Mp);
+    res.json(Mp);
 });
 
 app.put("/api/mps/:constituency", (req, res) => {
-    const con = req.params.con;
-    const mp = mps.some((m) => m.con===con);
+    const constituency = req.params.constituency;
+    const mp = mps.some((m) => m.constituency===constituency);
     const newName=req.body.name;
     const newAge=req.body.age;
     const newHometown=req.body.hometown;
@@ -62,7 +67,7 @@ app.put("/api/mps/:constituency", (req, res) => {
     const newReligion=req.body.religion
     if (mp) {
         mps.forEach((m) => {
-            if (m.constituency===constituency) {
+            if (m.constituency=== req.params.constituency) {
                 (m.name=newName?newName:m.name)
                 (m.age=newAge?newAge:m.age)
                 (m.hometown=newHometown?newHometown:m.hometown)
